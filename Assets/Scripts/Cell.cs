@@ -4,7 +4,7 @@ using TMPro;
 
 public class Cell : MonoBehaviour
 {
-    public int index; // posição de 0 a 8
+    public int index; // posiï¿½ï¿½o de 0 a 8
     public Button button;
     public TextMeshProUGUI cellText;
 
@@ -18,6 +18,9 @@ public class Cell : MonoBehaviour
 
     void OnClick()
     {
+        if (gameController.gameOption == GameOptions.BotVsBot)
+            return; // Nï¿½ï¿½o permitir jogadas se for Bot vs Bot
+
         gameController.CellClicked(index);
     }
 
