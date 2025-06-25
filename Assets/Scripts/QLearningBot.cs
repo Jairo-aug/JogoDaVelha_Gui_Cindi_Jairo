@@ -87,7 +87,7 @@ public class QLearningBot
         return moves;
     }
 
-    private string BoardToString(string[] board)
+    public string BoardToString(string[] board)
     {
         return string.Join("", board.Select(cell => cell == "" ? "_" : cell));
     }
@@ -108,6 +108,25 @@ public class QLearningBot
                 return board[a];
         }
         return null;
+    }
+
+    public void UpdateQTable(List<string> states, List<int> actions, double finalReward)
+    {
+        for (int i = states.Count - 1; i >= 0; i--)
+        {
+            string s = states[i];
+            int a = actions[i];
+
+            if (!qTable.ContainsKey(s))
+                qTable[s] = new Dictionary<int, double>();
+
+            if (!qTable[s].ContainsKey(a))
+                qTable[s][a] = 0;
+
+            double oldQ = qTable[s][a];
+            qTable[s][a] = oldQ + learningRate * (finalReward - oldQ);
+            finalReward *= discountFactor;
+        }
     }
 
     public void SaveQTable() { /* JSON ou PlayerPrefs */ }

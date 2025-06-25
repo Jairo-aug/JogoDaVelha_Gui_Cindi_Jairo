@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
 
 public enum GameOptions
 {
@@ -28,6 +29,8 @@ public class GameController : MonoBehaviour
     public GameObject botLevelMenu; // Refer��ncia ao menu de sele����o de n��vel do bot
     public GameObject gameCanvas; // Refer��ncia ao canvas do jogo
     public int mlEpisodes = 1000; // N��mero de epis��dios para treinar o bot de aprendizado de m��quina
+    private List<string> mlStates = new();
+    private List<int> mlActions = new();
 
     public string[] board = new string[9];
     private string currentPlayer = "X";
@@ -127,12 +130,14 @@ public class GameController : MonoBehaviour
 
             UpdateScoreUI();
             DisableAllCells();
-            StopCoroutine(BotVsBotGame()); // Para o jogo Bot vs Bot, se estiver rodando
+            StopAllCoroutines(); // Para o jogo Bot vs Bot, se estiver rodando
+            ApplyMachineLearningReward();
         }
         else if (IsBoardFull())
         {
             statusText.text = "Deu velha!";
-            StopCoroutine(BotVsBotGame()); // Para o jogo Bot vs Bot, se estiver rodando
+            StopAllCoroutines(); // Para o jogo Bot vs Bot, se estiver rodando
+            ApplyMachineLearningReward();
         }
         else
         {
@@ -142,6 +147,23 @@ public class GameController : MonoBehaviour
             {
                 BotAction(); // Chame a a����o do bot aqui, se implementada
             }
+        }
+    }
+    
+    public void ApplyMachineLearningReward()
+    {
+        if (botLevel == BotLevels.MachineLearning)
+        {
+            string winner = CheckWinner(board);
+            double reward = 0;
+
+            if (winner == "O") reward = 1; // bot venceu
+            else if (winner == "X") reward = -1; // bot perdeu
+            else if (IsBoardFull()) reward = 0.5; // empate
+
+            mlBot.UpdateQTable(mlStates, mlActions, reward);
+            mlStates.Clear();
+            mlActions.Clear();
         }
     }
 
@@ -165,6 +187,9 @@ public class GameController : MonoBehaviour
         else if (botLevel == BotLevels.MachineLearning)
         {
             bestIndex = mlBot.ChooseAction(board, currentPlayer);
+            string currentState = mlBot.BoardToString(board);
+            mlStates.Add(currentState);
+            mlActions.Add(bestIndex);
         }
         Debug.Log($"Bot jogando na posi����o: {bestIndex}");
         CellClicked(bestIndex);
