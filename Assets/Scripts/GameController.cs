@@ -344,4 +344,12 @@ public class GameController : MonoBehaviour
         scoreO = 0;
         UpdateScoreUI();
     }
+
+    public void OnBackToMenuUI()
+    {
+        gameCanvas.SetActive(false);
+        botLevelMenu.SetActive(false);
+        menu.SetActive(true);
+    }
+
 }
